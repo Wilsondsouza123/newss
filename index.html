@@ -1,367 +1,263 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Pre-Market Dashboard — US Markets</title>
-  <style>
-    :root { --bg:#f6f7f9; --card:#fff; --border:#e3e6ea; --text:#222; --muted:#556; }
-    * { box-sizing: border-box; }
-    body { margin:0; background:var(--bg); color:var(--text); font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
-    header { display:flex; gap:12px; align-items:center; justify-content:space-between; padding:14px 18px; position:sticky; top:0; background:rgba(246,247,249,.95); border-bottom:1px solid var(--border); z-index:10; }
-    h1 { font-size:18px; margin:0; }
-    .controls { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
-    .btn { display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border:1px solid var(--border); background:#111; color:#fff; border-radius:10px; cursor:pointer; font-size:14px; }
-    .btn.outline { background:#fff; color:#111; }
-    .btn.link { background:#fff; color:#0b5cab; border:1px dashed var(--border); }
-    .btn[disabled] { opacity:.5; cursor:not-allowed; }
-    .grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:18px; padding:18px; }
-    .card { background:var(--card); border:1px solid var(--border); border-radius:14px; box-shadow:0 2px 6px rgba(0,0,0,.05); overflow:hidden; }
-    .card h2 { margin:0; padding:10px 12px; background:#111; color:#fff; font-size:15px; display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap; }
-    .pad { padding:12px; }
-    .muted { color:#667085; font-size:12px; }
-    .rows { display:grid; gap:6px; }
-    .row { display:flex; align-items:center; justify-content:space-between; padding:6px 8px; border:1px solid var(--border); border-radius:10px; }
-    .row .sym { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
-    .gain { color:#0a7a36; }
-    .loss { color:#b42318; }
-    .inputs { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
-    input[type="text"], input[type="number"], input[type="password"] { padding:8px 10px; border:1px solid var(--border); border-radius:10px; font-size:14px; }
-    .pill { padding:3px 8px; border:1px solid var(--border); border-radius:999px; font-size:12px; background:#fff; }
-    @media (max-width: 1100px) { .grid { grid-template-columns:1fr; } }
-
-    /* Table styling for the education section */
-    table { width:100%; border-collapse: collapse; }
-    thead th { background:#111; color:#fff; text-align:left; padding:10px; }
-    td { border-top:1px solid var(--border); padding:10px; vertical-align: top; }
-    tbody tr:hover { background:#fafafa; }
-    .linklist { list-style: none; padding-left: 0; margin: 0; }
-    .linklist li { border-top:1px solid var(--border); padding:10px 0; }
-    .linklist li:first-child { border-top: 0; }
-    .linklist a { color:#0b5cab; text-decoration: none; }
-    .linklist a:hover { text-decoration: underline; }
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>US Pre-Market Dashboard — Gainers • Losers • News • 1-Week Trend</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<style>
+  :root{--bg:#f6f7f9;--card:#fff;--border:#e3e6ea;--text:#1c2128;--muted:#6b7280;--accent:#0b5cab;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font:14px/1.4 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+  header{position:sticky;top:0;background:rgba(246,247,249,.96);backdrop-filter:saturate(180%) blur(6px);
+          border-bottom:1px solid var(--border);padding:12px 16px;z-index:20;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+  h1{margin:0;font-size:16px}
+  input[type="password"],input[type="text"],input[type="number"]{padding:8px 10px;border:1px solid var(--border);border-radius:10px;min-width:260px}
+  .btn{background:#111;color:#fff;border:1px solid #111;border-radius:10px;padding:8px 12px;cursor:pointer}
+  .btn.secondary{background:#fff;color:#111;border-color:var(--border)}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  .pill{border:1px solid var(--border);background:#fff;border-radius:999px;padding:2px 8px;font-size:12px}
+  .grid{display:grid;grid-template-columns:360px 1fr 420px;gap:16px;padding:16px}
+  @media (max-width:1200px){.grid{grid-template-columns:1fr}}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:0 2px 6px rgba(0,0,0,.06)}
+  .card h2{margin:0;padding:10px 12px;background:#111;color:#fff;font-size:14px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+  .pad{padding:10px 12px}
+  .muted{color:var(--muted);font-size:12px}
+  table{width:100%;border-collapse:collapse}
+  th,td{padding:8px;border-top:1px solid var(--border);text-align:left}
+  thead th{background:#f1f2f4;border-top:none}
+  tr:hover{background:#fafafa}
+  .right{text-align:right}
+  .sym{font-family:ui-monospace,Menlo,Consolas,monospace;font-weight:600}
+  .gain{color:#0a7a36}
+  .loss{color:#b42318}
+  .flex{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .news-item{border-top:1px solid var(--border);padding:10px 0}
+  .news-item:first-child{border-top:none}
+  .news-item a{color:var(--accent);text-decoration:none}
+  .news-item a:hover{text-decoration:underline}
+  canvas{width:100%;height:260px}
+  .hint{padding:8px 12px;background:#fff1;display:inline-block;border:1px dashed var(--border);border-radius:10px}
+</style>
 </head>
 <body>
-  <header>
-    <h1>Pre-Market Dashboard — US Markets</h1>
-    <div class="controls">
-      <button class="btn" id="btn-refresh-agent">Run Agent Now</button>
-      <button class="btn outline" id="btn-autorefresh">Agent Auto-Refresh: OFF (2 min)</button>
-      <span class="pill" id="last-run">Last agent run: —</span>
-    </div>
-  </header>
 
-  <!-- Top row: Hotlists, Screener, Market Overview -->
-  <div class="grid">
-    <!-- TradingView Hotlists -->
-    <div class="card">
-      <h2>US Market Hotlists (Gainers / Losers / Most Active)</h2>
-      <div class="pad">
-        <div class="tradingview-widget-container" style="height:520px">
-          <div class="tradingview-widget-container__widget"></div>
-          <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-hotlists.js" async>
-          {
-            "colorTheme": "light",
-            "dateRange": "1D",
-            "exchange": "US",
-            "showChart": false,
-            "locale": "en",
-            "width": "100%",
-            "height": "520"
-          }
-          </script>
-        </div>
-      </div>
-      <div class="pad muted">TradingView widget (embeddable); for true pre-market prints use the Agent panel below or open Webull with the quick links.</div>
-    </div>
+<header>
+  <h1>US Pre-Market Dashboard</h1>
+  <input id="apiKey" type="password" placeholder="Polygon API Key (required)" />
+  <button class="btn" id="btnGainers">Load Gainers</button>
+  <button class="btn" id="btnLosers">Load Losers</button>
+  <button class="btn secondary" id="btnAuto">Auto-Refresh: OFF (2 min)</button>
+  <span class="pill" id="stamp">—</span>
+</header>
 
-    <!-- TradingView Screener -->
-    <div class="card">
-      <h2>US Stock Screener</h2>
-      <div class="pad">
-        <div class="tradingview-widget-container" style="height:520px">
-          <div class="tradingview-widget-container__widget"></div>
-          <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-screener.js" async>
-          {
-            "width": "100%",
-            "height": "520",
-            "defaultColumn": "overview",
-            "defaultScreen": "most_capitalized",
-            "market": "america",
-            "showToolbar": true,
-            "colorTheme": "light",
-            "locale": "en"
-          }
-          </script>
-        </div>
-      </div>
-      <div class="pad muted">Use the toolbar to tweak columns/filters; some feeds show extended hours.</div>
-    </div>
-
-    <!-- TradingView Market Overview -->
-    <div class="card">
-      <h2>US Market Overview</h2>
-      <div class="pad">
-        <div class="tradingview-widget-container" style="height:520px">
-          <div class="tradingview-widget-container__widget"></div>
-          <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-market-overview.js" async>
-          {
-            "colorTheme": "light",
-            "dateRange": "1D",
-            "showChart": true,
-            "width": "100%",
-            "height": "520",
-            "locale": "en",
-            "tabs": [
-              {
-                "title": "Indices",
-                "symbols": [
-                  { "s": "CME_MINI:ES1!", "d": "S&P 500 Futures" },
-                  { "s": "CME_MINI:NQ1!", "d": "Nasdaq 100 Futures" },
-                  { "s": "CBOT_MINI:YM1!", "d": "Dow Futures" }
-                ]
-              },
-              {
-                "title": "Tech Leaders",
-                "symbols": [
-                  { "s": "NASDAQ:AAPL", "d": "AAPL" },
-                  { "s": "NASDAQ:MSFT", "d": "MSFT" },
-                  { "s": "NASDAQ:NVDA", "d": "NVDA" },
-                  { "s": "NASDAQ:AMZN", "d": "AMZN" },
-                  { "s": "NASDAQ:TSLA", "d": "TSLA" }
-                ]
-              }
-            ]
-          }
-          </script>
-        </div>
-      </div>
-      <div class="pad muted">Futures help gauge pre-open sentiment.</div>
-    </div>
-  </div>
-
-  <!-- Webull quick links (opens in new tab, since iframe is blocked) -->
-  <div class="grid" style="grid-template-columns:1fr;">
-    <div class="card">
-      <h2>
-        Webull — Pre-Market Movers (opens in new tab)
-        <span>
-          <a class="btn link" href="https://www.webull.com/quote/us/gainers" target="_blank" rel="noopener">Gainers</a>
-          <a class="btn link" href="https://www.webull.com/quote/us/losers" target="_blank" rel="noopener">Losers</a>
-          <a class="btn link" href="https://www.webull.com/quote/us/active"  target="_blank" rel="noopener">Most Active</a>
-        </span>
-      </h2>
-      <div class="pad muted">
-        Webull’s official pages show real pre-market prints; they block embedding, so these buttons open the lists directly.
+<div class="grid">
+  <!-- Movers list -->
+  <div class="card" id="moversCard">
+    <h2>
+      Pre-Market Movers
+      <span class="muted" id="moversHint">Click a row to see news & 1-week trend</span>
+    </h2>
+    <div class="pad">
+      <table id="movers">
+        <thead>
+          <tr>
+            <th>Ticker</th>
+            <th>Name</th>
+            <th class="right">Premkt %</th>
+            <th class="right">Premkt Chg</th>
+            <th class="right">Premkt Px</th>
+            <th class="right">Vol</th>
+          </tr>
+        </thead>
+        <tbody id="moversBody"><tr><td colspan="6" class="muted">Load gainers or losers…</td></tr></tbody>
+      </table>
+      <div class="muted" style="margin-top:8px">
+        Data: Polygon “Top Market Movers” (updates starting ~4:00 AM ET; min vol 10k). Extended hours can be delayed depending on plan.
       </div>
     </div>
   </div>
 
-  <!-- Agent row -->
-  <div class="grid" style="grid-template-columns:1fr;">
-    <div class="card">
-      <h2>Agent — Watchlist Gainers ≥ +2% & Losers ≤ −2% (uses your API key)</h2>
-      <div class="pad">
-        <div class="inputs" style="margin-bottom:10px;">
-          <input id="api-key" type="password" placeholder="Finnhub API Key (optional)" style="min-width:280px;"/>
-          <input id="symbols" type="text" placeholder="Watchlist: AAPL, MSFT, NVDA, TSLA, AMZN" style="min-width:360px;"/>
-          <input id="interval" type="number" value="120" min="15" step="5" title="Seconds"/>
-          <button class="btn" id="run-agent">Run / Refresh</button>
-        </div>
-        <div class="muted">Enter your API key and watchlist. This panel fetches quotes and lists <strong>gainers ≥ +2%</strong> and <strong>losers ≤ −2%</strong> from your symbols. (TradingView widgets above don’t need a key.)</div>
-        <div class="rows" style="margin-top:12px;">
-          <div>
-            <div class="muted" style="margin-bottom:6px;">Gainers ≥ +2%</div>
-            <div id="gainers" class="rows"></div>
-          </div>
-          <div style="margin-top:12px;">
-            <div class="muted" style="margin-bottom:6px;">Losers ≤ −2%</div>
-            <div id="losers" class="rows"></div>
-          </div>
-        </div>
-      </div>
+  <!-- Chart / details -->
+  <div class="card">
+    <h2 id="chartTitle">1-Week Price Trend</h2>
+    <div class="pad">
+      <canvas id="chart"></canvas>
+      <div class="muted" id="chartNote" style="margin-top:8px">Shows last ~7 calendar days (daily bars). Select a symbol on the left.</div>
+      <div id="detailStats" class="pad" style="padding-left:0"></div>
     </div>
   </div>
 
-  <!-- Education / Reference row -->
-  <div class="grid" style="grid-template-columns:1fr 1fr;">
-    <div class="card">
-      <h2>Key Data for Intraday / Pre-Market Trading</h2>
-      <div class="pad">
-        <table>
-          <thead>
-            <tr>
-              <th style="width:32%">Data Type</th>
-              <th>Why it matters for intraday/pre-market trading</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Price change (absolute + % vs previous close)</td>
-              <td>To see who is moving, quickly spot momentum or potential reversals.</td>
-            </tr>
-            <tr>
-              <td>Volume (pre-market volume; relative to normal trading volume)</td>
-              <td>High volume gives legitimacy to the move. Low volume = more risk of fake moves.</td>
-            </tr>
-            <tr>
-              <td>Bid-ask spread / liquidity</td>
-              <td>A stock may be moving, but if spreads are huge or liquidity is poor, entering/exiting is costly.</td>
-            </tr>
-            <tr>
-              <td>Time of the move</td>
-              <td>When in the pre-market the move happens can matter (early vs just before market open).</td>
-            </tr>
-            <tr>
-              <td>News / catalysts</td>
-              <td>Earnings, guidance, M&amp;A, regulatory, etc. often drive these moves. Without a catalyst the move is riskier.</td>
-            </tr>
-            <tr>
-              <td>Technical levels (support/resistance, prior day high/low, gaps)</td>
-              <td>Helps decide entry, exit, and stop loss placement.</td>
-            </tr>
-            <tr>
-              <td>Volatility / intraday range</td>
-              <td>Helps adjust position size, stop loss, and expectations.</td>
-            </tr>
-            <tr>
-              <td>Sector / market indices / futures</td>
-              <td>Overall market direction matters; strong market up or down can pull stocks along.</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <div class="card">
-      <h2>Good Sources to Get That Data</h2>
-      <div class="pad">
-        <ul class="linklist">
-          <li><strong>Investing.com – Pre-Market</strong> — Active stocks, top gainers/losers, % change &amp; volume. 
-            <a href="https://www.investing.com/equities/pre-market" target="_blank" rel="noopener">Open</a>
-          </li>
-          <li><strong>MarketWatch – Premarket Movers</strong> — Leaders/laggards in pre-market. 
-            <a href="https://www.marketwatch.com/tools/screener/premarket" target="_blank" rel="noopener">Open</a>
-          </li>
-          <li><strong>Market Chameleon – Premarket Trading Activity</strong> — Who’s moving pre-market. 
-            <a href="https://marketchameleon.com/Reports/PremarketTrading" target="_blank" rel="noopener">Open</a>
-          </li>
-          <li><strong>TradingView</strong> — Screens, charts, alerts (widgets above). 
-            <a href="https://www.tradingview.com/" target="_blank" rel="noopener">Open</a>
-          </li>
-          <li><strong>Webull – Top Gainers / Pre-market</strong> — Live lists, often real-time. 
-            <a href="https://www.webull.com/quote/us/gainers" target="_blank" rel="noopener">Open</a>
-          </li>
-          <li><strong>Finviz – Top Gainers / Screener</strong> — Not always pre-market only but great filters. 
-            <a href="https://finviz.com/" target="_blank" rel="noopener">Open</a>
-          </li>
-          <li><strong>Yahoo Finance – Day Gainers/Losers</strong> — Intraday movement & charts. 
-            <a href="https://finance.yahoo.com/" target="_blank" rel="noopener">Open</a>
-          </li>
-          <li><strong>IntradayScreener.com</strong> — Useful for some markets (e.g., India). 
-            <a href="https://intradayscreener.com/" target="_blank" rel="noopener">Open</a>
-          </li>
-        </ul>
-        <p class="muted" style="margin-top:10px">Note: Some sites may require login or have delayed data; always confirm latency before trading decisions.</p>
-      </div>
+  <!-- News -->
+  <div class="card">
+    <h2>Latest News</h2>
+    <div class="pad" id="newsBox">
+      <div class="muted">Select a symbol to load headlines and summaries.</div>
     </div>
   </div>
+</div>
 
-  <script>
-    // ===== Agent controls (≥ ±2%) =====
-    const lastRun = document.getElementById('last-run');
-    const autoBtn = document.getElementById('btn-autorefresh');
-    const runBtn  = document.getElementById('btn-refresh-agent');
+<!-- Chart.js (lightweight via CDN) -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
-    function stamp() {
-      lastRun.textContent = 'Last agent run: ' + new Date().toLocaleTimeString();
-    }
+<script>
+/* ===== Config & helpers ===== */
+const el = id => document.getElementById(id);
+const fmtPct = v => (v>0?'+':'') + v.toFixed(2) + '%';
+const fmtNum = n => n?.toLocaleString('en-US');
+const todayISO = () => new Date().toISOString().slice(0,10);
+const daysAgoISO = d => { const x=new Date(); x.setDate(x.getDate()-d); return x.toISOString().slice(0,10); };
 
-    async function fetchFinnhubQuote(symbol, key){
-      const url = `https://finnhub.io/api/v1/quote?symbol=${encodeURIComponent(symbol)}&token=${key}`;
-      const res = await fetch(url);
-      if(!res.ok) throw new Error('Finnhub error for ' + symbol);
-      const d = await res.json();
-      return { symbol, price: d.c, percent: d.dp };
-    }
+let autoTimer=null, autoOn=false, chart, currentList='gainers', API='', STAMP = el('stamp');
 
-    async function runAgentOnce(){
-      const key = document.getElementById('api-key').value.trim();
-      const syms = document.getElementById('symbols').value.trim();
-      const gainersBox = document.getElementById('gainers');
-      const losersBox  = document.getElementById('losers');
-      gainersBox.innerHTML = '';
-      losersBox.innerHTML  = '';
+/* ===== Core fetchers (Polygon.io) =====
+   - Movers (gainers/losers): /v2/snapshot/locale/us/markets/stocks/{direction}
+   - News: /v2/reference/news?ticker=TSLA&limit=10
+   - Aggregates (daily OHLC): /v2/aggs/ticker/AAPL/range/1/day/{from}/{to}
+*/
+async function poly(path, params={}){
+  const key = API || el('apiKey').value.trim();
+  if(!key) throw new Error('API key missing');
+  const usp = new URLSearchParams({...params, apiKey:key});
+  const url = `https://api.polygon.io${path}?${usp.toString()}`;
+  const r = await fetch(url);
+  if(!r.ok) throw new Error(`HTTP ${r.status}`);
+  return r.json();
+}
 
-      if(!key || !syms){
-        const msg = document.createElement('div');
-        msg.className = 'muted';
-        msg.textContent = 'Enter API key and symbols to fetch filtered movers.';
-        gainersBox.appendChild(msg.cloneNode(true));
-        losersBox.appendChild(msg);
-        return;
-      }
-
-      const symbols = syms.split(/[\\s,]+/).map(s=>s.trim().toUpperCase()).filter(Boolean);
-      const results = await Promise.allSettled(symbols.map(s=>fetchFinnhubQuote(s, key)));
-      const ok = results.filter(r=>r.status==='fulfilled').map(r=>r.value);
-
-      const ups   = ok.filter(x=>x.percent >=  2).sort((a,b)=>b.percent-a.percent);
-      const downs = ok.filter(x=>x.percent <= -2).sort((a,b)=>a.percent-b.percent);
-
-      const row = (html, cls='') => {
-        const el = document.createElement('div');
-        el.className = 'row ' + cls;
-        el.innerHTML = html;
-        return el;
-      };
-
-      ups.forEach(x=>{
-        gainersBox.appendChild(row(
-          `<span class="sym">${x.symbol}</span><span class="gain">+${x.percent.toFixed(2)}%</span><span>${Number(x.price).toFixed(2)}</span>`,
-          'gain'
-        ));
-      });
-      downs.forEach(x=>{
-        losersBox.appendChild(row(
-          `<span class="sym">${x.symbol}</span><span class="loss">${x.percent.toFixed(2)}%</span><span>${Number(x.price).toFixed(2)}</span>`,
-          'loss'
-        ));
-      });
-
-      if(!ups.length)   gainersBox.appendChild(row('No gainers ≥ +2% in watchlist.','muted'));
-      if(!downs.length) losersBox.appendChild(row('No losers ≤ −2% in watchlist.','muted'));
-
-      stamp();
-    }
-
-    let agentTimer = null;
-    document.getElementById('run-agent').addEventListener('click', async ()=>{
-      const seconds = Math.max(15, Number(document.getElementById('interval').value||120));
-      if(agentTimer) clearInterval(agentTimer);
-      await runAgentOnce();
-      agentTimer = setInterval(runAgentOnce, seconds*1000);
+async function loadMovers(direction='gainers'){
+  currentList = direction;
+  API = el('apiKey').value.trim();
+  const body = el('moversBody');
+  body.innerHTML = `<tr><td colspan="6" class="muted">Loading ${direction}…</td></tr>`;
+  try{
+    const data = await poly(`/v2/snapshot/locale/us/markets/stocks/${direction}`);
+    const rows = (data.tickers||[]).map(t=>{
+      // Fields vary by plan; fall back gracefully
+      const sym = t.ticker || t.T || '';
+      const name = t.name || '';
+      const chg = t.todaysChange ?? (t.day?.c && t.prevDay?.c ? (t.day.c - t.prevDay.c) : null);
+      const chgPct = t.todaysChangePerc ?? (t.prevDay?.c ? ((t.day?.c - t.prevDay.c)/t.prevDay.c*100) : null);
+      const px = t.lastTrade?.p ?? t.min?.c ?? t.day?.c ?? null;
+      const vol = t.day?.v ?? t.min?.v ?? null;
+      return {sym,name,chg,chgPct,px,vol};
     });
 
-    runBtn.addEventListener('click', runAgentOnce);
+    if(!rows.length){
+      body.innerHTML = `<tr><td colspan="6" class="muted">No data returned (plan/delays or market closed). Try again closer to 12:00 GST (4:00 AM ET).</td></tr>`;
+      return;
+    }
 
-    let autoOn = false;
-    autoBtn.addEventListener('click', ()=>{
-      autoOn = !autoOn;
-      if (autoOn) {
-        autoBtn.textContent = 'Agent Auto-Refresh: ON (2 min)';
-        if (agentTimer) clearInterval(agentTimer);
-        agentTimer = setInterval(runAgentOnce, 120000);
-        runAgentOnce();
-      } else {
-        autoBtn.textContent = 'Agent Auto-Refresh: OFF (2 min)';
-        if (agentTimer) clearInterval(agentTimer);
-      }
+    body.innerHTML = rows.map(r=>`
+      <tr data-sym="${r.sym}">
+        <td class="sym">${r.sym}</td>
+        <td>${r.name??''}</td>
+        <td class="right ${r.chgPct>=0?'gain':'loss'}">${r.chgPct!=null?fmtPct(r.chgPct):'—'}</td>
+        <td class="right ${r.chg>=0?'gain':'loss'}">${r.chg!=null?r.chg.toFixed(2):'—'}</td>
+        <td class="right">${r.px!=null?r.px.toFixed(2):'—'}</td>
+        <td class="right">${r.vol!=null?fmtNum(r.vol):'—'}</td>
+      </tr>
+    `).join('');
+
+    // bind clicks
+    [...body.querySelectorAll('tr[data-sym]')].forEach(tr=>{
+      tr.addEventListener('click', ()=>selectSymbol(tr.dataset.sym));
     });
 
-    // initial stamp
-    stamp();
-  </script>
+    STAMP.textContent = `Last refresh: ${new Date().toLocaleTimeString()}`;
+  }catch(err){
+    body.innerHTML = `<tr><td colspan="6" class="muted">Error: ${err.message}. Check API key & CORS/network.</td></tr>`;
+  }
+}
+
+async function selectSymbol(ticker){
+  el('chartTitle').textContent = `1-Week Trend — ${ticker}`;
+  el('newsBox').innerHTML = `<div class="muted">Loading news for ${ticker}…</div>`;
+  el('detailStats').innerHTML = '';
+
+  // 1) News (latest 8)
+  try{
+    const news = await poly('/v2/reference/news', { ticker, limit: 8 });
+    if(!news?.results?.length){
+      el('newsBox').innerHTML = `<div class="muted">No recent headlines.</div>`;
+    }else{
+      el('newsBox').innerHTML = news.results.map(n=>`
+        <div class="news-item">
+          <a href="${n.article_url||n.url}" target="_blank" rel="noopener">${escapeHtml(n.title||'Headline')}</a>
+          <div class="muted">${escapeHtml(n.description||'')}</div>
+          <div class="muted">${new Date(n.published_utc||n.published_at).toLocaleString()} • ${escapeHtml(n.source||'')}</div>
+        </div>
+      `).join('');
+    }
+  }catch(e){
+    el('newsBox').innerHTML = `<div class="muted">News error: ${e.message}</div>`;
+  }
+
+  // 2) 1-week daily aggregates for sparkline
+  try{
+    const to = todayISO();
+    const from = daysAgoISO(8); // buffer for weekends/holidays
+    const agg = await poly(`/v2/aggs/ticker/${encodeURIComponent(ticker)}/range/1/day/${from}/${to}`, { adjusted:true, sort:'asc', limit:120 });
+    const pts = (agg.results||[]).map(r=>({ t:new Date(r.t), c:r.c }));
+    if(!pts.length){
+      draw([],ticker);
+      el('chartNote').textContent = 'No recent daily bars returned.';
+      return;
+    }
+    draw(pts,ticker);
+
+    // Basic stat block (last close, 5-day change)
+    if(pts.length>=2){
+      const last = pts[pts.length-1].c;
+      const first = pts[0].c;
+      const chg = last-first;
+      const pct = (chg/first)*100;
+      el('detailStats').innerHTML = `
+        <div class="muted">Last close: <strong>${last.toFixed(2)}</strong> • 1-week: <strong class="${pct>=0?'gain':'loss'}">${fmtPct(pct)}</strong></div>
+      `;
+    }
+  }catch(e){
+    el('chartNote').textContent = `Aggregates error: ${e.message}`;
+  }
+}
+
+function draw(points, sym){
+  const ctx = el('chart').getContext('2d');
+  const labels = points.map(p=>p.t.toLocaleDateString());
+  const data = points.map(p=>p.c);
+  if(chart){ chart.destroy(); }
+  chart = new Chart(ctx, {
+    type:'line',
+    data:{ labels, datasets:[{ label: sym, data, tension:.2, pointRadius:0, borderWidth:2 }]},
+    options:{
+      responsive:true,
+      scales:{ x:{ grid:{display:false}}, y:{ ticks:{ callback:v=>'$'+v }}},
+      plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label:(c)=>`$${c.formattedValue}` }}}
+    }
+  });
+}
+
+function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m])); }
+
+/* ===== UI wiring ===== */
+el('btnGainers').addEventListener('click',()=>loadMovers('gainers'));
+el('btnLosers').addEventListener('click',()=>loadMovers('losers'));
+
+el('btnAuto').addEventListener('click',()=>{
+  autoOn = !autoOn;
+  el('btnAuto').textContent = `Auto-Refresh: ${autoOn?'ON':'OFF'} (2 min)`;
+  if(autoTimer) clearInterval(autoTimer);
+  if(autoOn){
+    autoTimer = setInterval(()=>loadMovers(currentList), 120000);
+    loadMovers(currentList);
+  }
+});
+</script>
+
+<!--
+Notes:
+• Polygon Top Market Movers starts repopulating around 4:00 AM ET (~12:00 GST) and includes only tickers with volume ≥10k.
+• News & aggregates endpoints are also from Polygon.
+-->
 </body>
 </html>
